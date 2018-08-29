@@ -52,18 +52,21 @@ namespace Fido2NetLib
 
             if (Raw.Type != "public-key") throw new Fido2VerificationException("AssertionResponse Type is not set to public-key");
 
+            if (Raw.Id == null) throw new Fido2VerificationException("Id is missing");
+            if (Raw.RawId == null) throw new Fido2VerificationException("RawId is missing");
+
             // 1. If the allowCredentials option was given when this authentication ceremony was initiated, verify that credential.id identifies one of the public key credentials that were listed in allowCredentials.
             if (options.AllowCredentials != null && options.AllowCredentials.Count() > 0)
             {
                 // might need to transform x.Id and raw.id as described in https://www.w3.org/TR/webauthn/#publickeycredential
-                if (!options.AllowCredentials.Any(x => x.Id.SequenceEqual(Raw.Id))) throw new Fido2VerificationException();
+                if (!options.AllowCredentials.Any(x => x.Id.SequenceEqual(Raw.RawId))) throw new Fido2VerificationException();
             }
 
             // 2. If credential.response.userHandle is present, verify that the user identified by this value is the owner of the public key credential identified by credential.id.
             if (UserHandle != null)
             {
                 if (UserHandle.Length == 0) throw new Fido2VerificationException("Userhandle was empty DOMString. It should either be null or have a value.");
-                if (false == await isUserHandleOwnerOfCredId(new IsUserHandleOwnerOfCredentialIdParams(Raw.Id, UserHandle)))
+                if (false == await isUserHandleOwnerOfCredId(new IsUserHandleOwnerOfCredentialIdParams(Raw.RawId, UserHandle)))
                 {
                     throw new Fido2VerificationException("User is not owner of the public key identitief by the credential id");
                 }
@@ -138,7 +141,7 @@ namespace Fido2NetLib
 
             return new AssertionVerificationSuccess()
             {
-                CredentialId = Raw.Id,
+                CredentialId = Raw.RawId,
                 Counter = counter
             };
         }

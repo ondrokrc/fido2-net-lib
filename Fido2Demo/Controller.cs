@@ -124,7 +124,7 @@ namespace Fido2Demo
             var options = AssertionOptions.FromJson(jsonOptions);
 
             // 2. Get registered credential from database
-            StoredCredential creds = DemoStorage.GetCredentialById(clientResponse.Id);
+            StoredCredential creds = DemoStorage.GetCredentialById(clientResponse.RawId);
 
             // 3. Get credential counter from database
             var storedCounter = creds.SignatureCounter;
